@@ -5,6 +5,7 @@ const dbcon = require('../dbcon');
 const si = require('systeminformation');
 const config = require('../config');
 const ftp_model = require('../models/pureftp_model');
+const striptags = require('striptags');
 
 var { randomBytes } = require('crypto'); // for creating CSRF Token
 
@@ -66,7 +67,7 @@ router.post('/users/add', express.urlencoded({extended: true}), async function (
 		res.redirect('/login');
 		return false;
 	}
-	username = req.body.username;
+	username = striptags(req.body.username);
 	password = req.body.password;
 	isCSRFVerified = !((!req.body._csrf) || (req.body._csrf !== req.session.csrf));
 	if (isCSRFVerified) {

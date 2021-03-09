@@ -4,6 +4,7 @@ var router = express.Router();
 const dbcon = require('../dbcon');
 const ftp_model = require('../models/pureftp_model');
 const si = require('systeminformation');
+const { encode, decode } = require('html-entities');
 
 // middleware that is specific to this router
 // router.use(function timeLog (req, res, next) {
@@ -33,7 +34,7 @@ router.get('/ftpusers', async (req, res) => {
 	var i;
 	for(i=0; i<resultdata.length; i++) {
 		arr = [
-			resultdata[i].User,
+			encode(resultdata[i].User),
 			resultdata[i].Uid,
 			resultdata[i].Gid,
 			resultdata[i].Dir,

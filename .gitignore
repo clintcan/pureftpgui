@@ -1,3 +1,7 @@
+# Configuration
+config.js
+dbcon.js
+
 # Logs
 logs
 *.log

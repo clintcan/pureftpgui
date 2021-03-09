@@ -6,6 +6,12 @@ const si = require('systeminformation');
 const config = require('../config');
 const ftp_model = require('../models/pureftp_model');
 
+// Let us use CSRF protection
+var cookieParser = require('cookie-parser');
+var csrf = require('csurf');
+
+var csrfProtection = csrf({ cookie: true })
+
 // middleware that is specific to this router
 // router.use(function timeLog (req, res, next) {
 //   console.log('Controller Accessed Time: ', Date.now())
@@ -20,8 +26,8 @@ router.get('/', async function (req, res) {
 	res.render('index');
 });
 
-router.get('/login', async function (req, res) {
-	res.render('pages/login');
+router.get('/login', csrfProtection, async function (req, res) {
+	res.render('pages/login', { csrfToken: req.csrfToken() });
 });
 
 router.post('/login', async function (req, res) {

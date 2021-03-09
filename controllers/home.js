@@ -6,39 +6,37 @@ const si = require('systeminformation');
 const config = require('../config');
 const ftp_model = require('../models/pureftp_model');
 
-// Let us use CSRF protection
-var cookieParser = require('cookie-parser');
-var csrf = require('csurf');
+var { randomBytes } = require('crypto'); // for creating CSRF Token
 
-var csrfProtection = csrf({ cookie: true })
 
-// middleware that is specific to this router
-// router.use(function timeLog (req, res, next) {
-//   console.log('Controller Accessed Time: ', Date.now())
-//   next()
-// });
 
 router.get('/', async function (req, res) {
 	if (!req.session.loggedIn) {
 		res.redirect('/login');
 		return false;
 	}
-	res.render('index');
+	if (req.session.csrf === undefined) {
+		req.session.csrf = randomBytes(100).toString('base64');
+	}
+	res.render('index', { csrfToken: req.session.csrf });
 });
 
-router.get('/login', csrfProtection, async function (req, res) {
-	res.render('pages/login', { csrfToken: req.csrfToken() });
+router.get('/login', async function (req, res) {
+	req.session.csrf = randomBytes(100).toString('base64');
+	res.render('pages/login', { csrfToken: req.session.csrf });
 });
 
 router.post('/login', async function (req, res) {
 	username = req.body.username;
 	password = req.body.password;
-	if(config.adminuser == username && config.adminpass == password) {
+	isCSRFVerified = !((!req.body._csrf) || (req.body._csrf !== req.session.csrf));
+	if(config.adminuser == username && config.adminpass == password && isCSRFVerified) {
 		req.session.loggedIn = true;
 		res.redirect('/');
 		return true;
 	}
-	res.render('pages/login');
+	req.session.csrf = randomBytes(100).toString('base64'); // convert random data to a string
+	res.render('pages/login', { csrfToken: req.session.csrf });
 });
 
 router.get('/logout', async function (req, res) {
@@ -59,7 +57,8 @@ router.get('/users/add', async function (req, res) {
 		res.redirect('/login');
 		return false;
 	}
-	res.render('pages/adduser');
+	req.session.csrf = randomBytes(100).toString('base64');
+	res.render('pages/adduser', { csrfToken: req.session.csrf });
 });
 
 router.post('/users/add', express.urlencoded({extended: true}), async function (req, res) {
@@ -69,7 +68,10 @@ router.post('/users/add', express.urlencoded({extended: true}), async function (
 	}
 	username = req.body.username;
 	password = req.body.password;
-	await ftp_model.createFTPUser(username, password);
+	isCSRFVerified = !((!req.body._csrf) || (req.body._csrf !== req.session.csrf));
+	if (isCSRFVerified) {
+		await ftp_model.createFTPUser(username, password);
+	}
 	res.redirect('/users');
 });
 

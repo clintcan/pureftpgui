@@ -118,7 +118,9 @@
                                                        class="table table-striped table-bordered nowrap">
                                                     <tr>
                                                         <td>Username</td>
-                                                        <td><input type="text" name="username" required></td>
+                                                        <td>
+                                                            <input type="hidden" name="_csrf" value="{{csrfToken}}">
+                                                            <input type="text" name="username" required></td>
                                                     </tr>
                                                     <tr>
                                                         <td>Password</td>

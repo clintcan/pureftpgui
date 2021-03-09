@@ -1,9 +1,9 @@
 const mysql = require('mysql2');
 
 var dbconnection = {
-	dbhost: "dbuser",
-	dbuser: "dbpass",
-	dbpass: "",
+	dbhost: "dbhost",
+	dbuser: "dbuser",
+	dbpass: "dbpass",
 	port: 3306,
 	db: "pureftp"
 }
